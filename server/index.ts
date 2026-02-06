@@ -83,7 +83,9 @@ app.use((req, res, next) => {
   }
 
   const port = parseInt(process.env.PORT || "5000", 10);
-  httpServer.listen(port, "localhost", () => {
+  
+  // Yahan change kiya hai: "localhost" ki jagah "0.0.0.0" use kiya hai Render ke liye
+  httpServer.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
 })();

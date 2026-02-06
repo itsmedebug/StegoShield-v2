@@ -17,7 +17,7 @@
 - **ORM**: Drizzle ORM
 npm run dev
 Installation & Setup
-1. Clone the repo: `git clone https://github.com/yourusername/StegoShield.git`
+1. Clone the repo: `git clone https://github.com/itsmedebug/StegoShield.git`
 2. Install dependencies: `npm install`
 3. Set up `.env` file with `DATABASE_URL`.
 4. Push database schema: `npm run db:push`
