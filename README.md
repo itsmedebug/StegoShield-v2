@@ -1,24 +1,35 @@
-# StegoShield 🛡️ | FraudLock Hackathon Project
+StegoShield 🛡️
+StegoShield is an advanced Image Steganography tool that hides secret messages inside images. It is specifically designed with a focus on cybersecurity and data privacy.
 
-**StegoShield** ek advanced Image Steganography tool hai jo secret messages ko images ke andar hide karta hai. Ise specifically cybersecurity aur data privacy ko dhyan mein rakh kar banaya gaya hai.
+🚀 Features
+LSB Encoding: Uses the Least Significant Bit algorithm for high-quality encoding.
 
+AES-256 Encryption: Option to encrypt the payload before hiding it.
 
+Real-time Capacity Check: Calculates how large a message can be hidden based on the image size.
 
-## 🚀 Features
-- **LSB Encoding**: Least Significant Bit algorithm ka use karke high-quality encoding.
-- **AES-256 Encryption**: Payload ko hide karne se pehle encrypt karne ka option.
-- **Real-time Capacity Check**: Image size ke hisab se bata deta hai ki kitna bada message hide ho sakta hai.
-- **Fraud Detection Logic**: AI-generated images aur modified images ke beech farq samajhne mein madad karta hai.
+Fraud Detection Logic: Helps differentiate between AI-generated images and modified images.
 
-## 🛠️ Tech Stack
-- **Frontend**: React.js, Tailwind CSS, Lucide Icons
-- **Backend**: Node.js, Express.js
-- **Database**: PostgreSQL (Neon.tech)
-- **ORM**: Drizzle ORM
-npm run dev
+🛠️ Tech Stack
+Frontend: React.js, Tailwind CSS, Lucide Icons
+
+Backend: Node.js, Express.js
+
+Database: PostgreSQL (Neon.tech)
+
+ORM: Drizzle ORM
+
 Installation & Setup
-1. Clone the repo: `git clone https://github.com/itsmedebug/StegoShield.git`
-2. Install dependencies: `npm install`
-3. Set up `.env` file with `DATABASE_URL`.
-4. Push database schema: `npm run db:push`
-5. Start dev server: `npm run dev`
+Clone the repository:
+git clone https://github.com/itsmedebug/StegoShield.git
+
+Install dependencies:
+npm install
+
+Set up the .env file with DATABASE_URL.
+
+Push the database schema:
+npm run db:push
+
+Start the development server:
+npm run dev
