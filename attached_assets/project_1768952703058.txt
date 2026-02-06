@@ -1,0 +1,324 @@
+{
+  "project_name": "StegoShield — LSB Image Steganography Tool (PNG/BMP) with AES",
+  "goal": "Build a professional-grade steganography application that hides and extracts secret messages in lossless images (PNG/BMP) using LSB, with optional AES password protection, capacity calculation, verification, and both GUI + CLI. Emphasize secure-by-design UX, polished UI, and expert-level features.",
+  "target_users": [
+    "Cybersecurity students",
+    "Red/Blue team learners",
+    "Security researchers (basic stego demonstrations)",
+    "Users needing covert messaging in benign environments"
+  ],
+  "non_goals_and_warnings": {
+    "no_illegal_guidance": "Include clear warnings against misuse. Provide educational framing and legality notices.",
+    "format_limitations": "Do not support JPEG for embedding (only allow extraction attempt with warning if user loads JPEG).",
+    "security_limitations": "Explain LSB stego is detectable via steganalysis; AES protects content but not presence."
+  },
+  "core_features": {
+    "encode": {
+      "inputs": [
+        "cover image (PNG/BMP)",
+        "secret message (text) OR file payload (optional stretch)",
+        "password (optional, triggers AES encryption)",
+        "output format (PNG/BMP)",
+        "LSB depth (1 by default; advanced: 2; warn quality impact)",
+        "channel selection (RGB default; advanced: choose R/G/B)"
+      ],
+      "process": [
+        "Detect input format; validate lossless.",
+        "Compute capacity in bits/bytes based on image dimensions and chosen channels/LSB depth.",
+        "If password provided: derive key from password with PBKDF2 or scrypt + salt; encrypt message with AES-GCM (preferred) producing nonce+tag+ciphertext.",
+        "Create payload header: magic bytes + version + flags + length + crypto params (salt/nonce/tag) + CRC/sha256.",
+        "Convert payload to bitstream; embed sequentially into pixel channel LSBs.",
+        "Write output image in chosen lossless format.",
+        "Verification step: optionally re-read output and attempt decode to confirm integrity."
+      ],
+      "outputs": [
+        "stego image file",
+        "embed report (capacity used, payload size, settings, checksum)"
+      ]
+    },
+    "decode": {
+      "inputs": [
+        "stego image (PNG/BMP)",
+        "password (optional; required if encrypted payload detected)"
+      ],
+      "process": [
+        "Read header from extracted bits; validate magic/version.",
+        "Extract payload bytes using stored length.",
+        "Verify checksum/hash.",
+        "If encrypted: derive key using stored KDF params; decrypt with AES-GCM; show clear error on wrong password/tag failure.",
+        "Render recovered message and allow save to file."
+      ],
+      "outputs": [
+        "recovered message text",
+        "decode report (integrity, encryption status, timing)"
+      ]
+    },
+    "capacity_calculator": {
+      "display": [
+        "max bytes possible with current settings",
+        "recommended max payload size for stealth (e.g., keep < 10–20% capacity)",
+        "estimated visual risk indicator"
+      ]
+    },
+    "security_and_detection_education_panel": {
+      "content": [
+        "What LSB is and why PNG/BMP",
+        "Why JPEG breaks stego",
+        "Difference between steganography and encryption",
+        "Basic steganalysis overview (histograms, chi-square, RS analysis) at conceptual level",
+        "Legal and ethical notice"
+      ]
+    }
+  },
+  "architecture": {
+    "recommended_stack": {
+      "backend_language": "Python",
+      "libraries": [
+        "Pillow (image I/O)",
+        "numpy (pixel manipulation, performance)",
+        "cryptography (AES-GCM, KDF)",
+        "typer or argparse (CLI)",
+        "rich (CLI progress + colored output)",
+        "pydantic (config/validation)"
+      ],
+      "gui_options": [
+        {
+          "option": "Desktop (recommended for polished UX)",
+          "framework": "Tauri + React/Next.js + TypeScript",
+          "benefits": "Modern UI, native packaging, fast, secure sandboxed backend via Rust or Python sidecar."
+        },
+        {
+          "option": "Python-native desktop",
+          "framework": "PySide6 (Qt)",
+          "benefits": "Single-language, strong desktop widgets, theming possible."
+        },
+        {
+          "option": "Web app (local only)",
+          "framework": "FastAPI + React",
+          "benefits": "Runs in browser; ensure local processing; avoid server upload for privacy."
+        }
+      ]
+    },
+    "modules": [
+      "io/image_loader.py (format detection, pixel extraction)",
+      "stego/lsb_encoder.py (embed bitstream)",
+      "stego/lsb_decoder.py (extract bitstream)",
+      "crypto/kdf.py (PBKDF2/scrypt)",
+      "crypto/aes_gcm.py (encrypt/decrypt)",
+      "payload/header.py (magic/version/flags/length/checksums)",
+      "cli/main.py",
+      "gui/* (views, state, animations, theming)",
+      "docs/*"
+    ]
+  },
+  "ui_ux_spec": {
+    "design_language": "Professional security tool aesthetic: dark mode by default, high contrast, subtle neon accents, clean typography, minimal clutter, data-dense panels.",
+    "theme": {
+      "modes": ["Dark", "Light"],
+      "colors_dark": {
+        "bg": "#0B1220",
+        "panel": "#0F1B2D",
+        "text": "#E6EDF7",
+        "muted": "#9FB0C3",
+        "primary": "#4DA3FF",
+        "success": "#2EE59D",
+        "warning": "#FFC857",
+        "danger": "#FF4D6D"
+      },
+      "typography": {
+        "font_primary": "Inter",
+        "font_mono": "JetBrains Mono"
+      }
+    },
+    "layout": {
+      "structure": "Left sidebar navigation + top command bar + main workspace with 2-column panels + bottom status bar.",
+      "navigation_items": [
+        "Encode",
+        "Decode",
+        "Capacity",
+        "Compare",
+        "History",
+        "Docs",
+        "Settings"
+      ],
+      "status_bar": [
+        "current file",
+        "format",
+        "capacity used",
+        "encryption status",
+        "integrity status",
+        "processing time"
+      ]
+    },
+    "key_screens": {
+      "encode_screen": {
+        "components": [
+          "Cover Image Picker (drag & drop, file validation, preview)",
+          "Message Input (tabs: Text | File payload (optional stretch))",
+          "Encryption Card (password field with strength meter, show/hide, AES-GCM badge)",
+          "Advanced Options (LSB depth, channels, embedding order, header version)",
+          "Capacity Meter (progress bar + numeric bytes + safe range suggestion)",
+          "Primary CTA: 'Embed & Export'",
+          "Secondary: 'Dry Run' (simulate capacity + settings, no output)",
+          "Tertiary: 'Verify Output' toggle"
+        ],
+        "expert_touch": [
+          "Inline warnings if payload too large or risky",
+          "Explain each advanced option via tooltips and 'Learn more' links",
+          "Real-time recalculation of capacity as settings change"
+        ]
+      },
+      "decode_screen": {
+        "components": [
+          "Stego Image Picker",
+          "Detected Payload Card (encrypted? version? length? checksum?)",
+          "Password input (only if needed)",
+          "Primary CTA: 'Extract'",
+          "Output viewer (monospace), 'Copy', 'Save as .txt', 'Clear'",
+          "Integrity badge (Pass/Fail), detailed error messages"
+        ]
+      },
+      "compare_screen": {
+        "purpose": "Show original vs stego image differences for learning/QA.",
+        "components": [
+          "Side-by-side previews",
+          "Diff heatmap overlay (optional)",
+          "Histogram comparison (RGB histograms)",
+          "Quality notes"
+        ]
+      },
+      "history_screen": {
+        "components": [
+          "Local-only log of recent operations (no telemetry)",
+          "Export report JSON",
+          "Clear history"
+        ]
+      },
+      "settings_screen": {
+        "components": [
+          "Default output format",
+          "Default LSB depth",
+          "Security: auto-clear clipboard after N seconds",
+          "Privacy: disable history",
+          "Performance: use numpy acceleration toggle"
+        ]
+      }
+    },
+    "buttons_and_microinteractions": {
+      "button_styles": [
+        "Primary filled (Embed/Extract)",
+        "Secondary outline (Dry run/Compare)",
+        "Destructive (Clear/Delete)",
+        "Icon buttons with tooltips"
+      ],
+      "animations": [
+        "Sidebar active indicator slide",
+        "Card hover elevation (subtle)",
+        "Progress shimmer during embedding/extraction",
+        "Toast notifications (success/warn/error)",
+        "Skeleton loaders for previews",
+        "Smooth expand/collapse for Advanced Options"
+      ],
+      "accessibility": [
+        "Keyboard navigation",
+        "ARIA labels",
+        "Color contrast compliant",
+        "Reduced motion option"
+      ]
+    }
+  },
+  "cli_spec": {
+    "commands": [
+      {
+        "name": "encode",
+        "example": "stegoshield encode --in cover.png --out stego.png --message \"secret\" --password \"pass\" --lsb 1 --channels rgb --verbose",
+        "flags": [
+          "--in",
+          "--out",
+          "--message / --message-file",
+          "--password",
+          "--lsb",
+          "--channels",
+          "--verify",
+          "--verbose"
+        ]
+      },
+      {
+        "name": "decode",
+        "example": "stegoshield decode --in stego.png --password \"pass\" --verbose",
+        "flags": [
+          "--in",
+          "--password",
+          "--out-message-file",
+          "--verbose"
+        ]
+      },
+      {
+        "name": "capacity",
+        "example": "stegoshield capacity --in cover.png --lsb 1 --channels rgb",
+        "flags": [
+          "--in",
+          "--lsb",
+          "--channels"
+        ]
+      }
+    ],
+    "output_quality": [
+      "Use Rich progress bars",
+      "Clear error messages (wrong password vs corrupt payload)",
+      "Verbose mode prints header fields and capacity math"
+    ]
+  },
+  "payload_format": {
+    "header_fields": [
+      "magic = 'SSLD' (4 bytes)",
+      "version (1 byte)",
+      "flags (1 byte: encrypted, compression, etc.)",
+      "kdf_id (1 byte)",
+      "salt_len (1 byte) + salt",
+      "nonce_len (1 byte) + nonce",
+      "tag_len (1 byte) + tag (for GCM)",
+      "payload_len (4 or 8 bytes, big-endian)",
+      "checksum/hash (e.g., sha256 truncated or CRC32)"
+    ],
+    "note": "Store enough metadata for reliable decode and to detect wrong-password vs corrupted data."
+  },
+  "quality_requirements": {
+    "testing": [
+      "Unit tests for bit packing/unpacking",
+      "Property-based tests (Hypothesis) for round-trip encode/decode",
+      "Golden test images (PNG/BMP)",
+      "Crypto tests: wrong password must fail cleanly"
+    ],
+    "performance": [
+      "Use numpy arrays for pixel operations",
+      "Avoid per-pixel Python loops when possible",
+      "Show time estimates for large images"
+    ],
+    "privacy": [
+      "No network calls",
+      "Local-only processing",
+      "Do not store passwords; clear from memory where practical"
+    ]
+  },
+  "deliverables": [
+    "Desktop GUI app (Encode/Decode/Compare/Docs/Settings)",
+    "CLI tool",
+    "Documentation site or markdown docs",
+    "Example images + tutorial walkthrough",
+    "Threat model + limitations section"
+  ],
+  "ai_build_instructions": {
+    "coding_style": [
+      "Type hints everywhere",
+      "Pydantic models for configs",
+      "Separation of concerns (stego vs crypto vs io)",
+      "Meaningful exceptions with user-safe messages"
+    ],
+    "documentation_style": [
+      "Explain conceptually first, then show practical usage",
+      "Include ethical/legal notice",
+      "Include troubleshooting: JPEG warning, wrong password, insufficient capacity"
+    ]
+  }
+}
